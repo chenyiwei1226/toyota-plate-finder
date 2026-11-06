@@ -1,0 +1,9 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/api/official-plates"
+  to = "/.netlify/functions/official-plates"
+  status = 200
+  force = true
