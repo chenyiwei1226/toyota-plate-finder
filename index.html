@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1424">
+<title>車牌快找 Pro｜官方資料版</title>
+<style>
+:root{--bg:#0b1424;--panel:#142137;--panel2:#101b2e;--line:#2a3d5b;--text:#f3f7ff;--muted:#9db0ca;--mint:#54c5aa;--gold:#f4c66a;--red:#ff9b9b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#14243c 0,#0b1424 55%);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Noto Sans TC",sans-serif}
+main{max-width:1100px;margin:auto;padding:22px 16px 64px}.hero{display:flex;align-items:center;gap:16px;margin:12px 0 22px}.logo{width:66px;height:66px;border-radius:22px;background:linear-gradient(135deg,#5bd2b6,#258f91);display:grid;place-items:center;color:#06212b;font-size:34px;font-weight:900}.hero h1{font-size:30px;margin:0}.hero p{color:var(--muted);margin:4px 0 0;font-weight:650}.status{display:flex;align-items:center;gap:9px;color:var(--gold);margin:0 0 20px;font-weight:700}.dot{width:10px;height:10px;background:var(--gold);border-radius:50%}
+.tabs{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:18px}.tab,button,.btn{border:1px solid var(--line);background:#1a2a43;color:var(--text);padding:12px 17px;border-radius:15px;font-weight:750;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px}.tab.active,.primary{background:var(--mint);color:#06252a;border-color:var(--mint)}button:disabled{opacity:.5;cursor:not-allowed}
+.panel{background:rgba(20,33,55,.94);border:1px solid var(--line);border-radius:24px;padding:22px;margin:16px 0;box-shadow:0 12px 30px #0002}.panel h2{font-size:22px;margin:0 0 16px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.field label{display:block;color:var(--muted);font-weight:700;margin-bottom:7px}.field input,.field select{width:100%;background:#0d182a;color:var(--text);border:1px solid var(--line);border-radius:14px;padding:14px;font:inherit;min-width:0}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:17px}.hint{font-size:13px;color:var(--muted)}.notice{border:1px solid #6e572a;background:#332b1c;color:#ffe2a1;border-radius:15px;padding:13px 15px;margin:12px 0}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}.stat{background:var(--panel2);border:1px solid var(--line);border-radius:16px;padding:15px}.stat strong{font-size:25px;display:block}.stat span{color:var(--muted);font-size:13px}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:650px}th,td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--line);font-size:14px}th{color:var(--muted);font-weight:750}.pill{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:3px 9px;color:var(--muted);font-size:12px}.empty{padding:32px 14px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:17px}.hidden{display:none!important}.fav{background:transparent;padding:7px 10px}.source{overflow-wrap:anywhere}.footer{color:var(--muted);font-size:12px;margin-top:25px}.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#e8fff8;color:#07342e;padding:11px 17px;border-radius:99px;font-weight:800;display:none;z-index:9}
+@media(max-width:650px){main{padding:16px 12px 48px}.hero h1{font-size:25px}.logo{width:58px;height:58px}.panel{padding:17px;border-radius:20px}.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.tab{flex:1}}
+</style>
+</head>
+<body><main>
+<header class="hero"><div class="logo">牌</div><div><h1>車牌快找 Pro</h1><p>官方資料限定・全台公告搜尋・智慧選牌</p></div></header>
+<div class="status"><span class="dot"></span><span id="statusText">官方資料尚未同步</span></div>
+<nav class="tabs"><button class="tab active" data-tab="search">官方公告搜尋</button><button class="tab" data-tab="saved">我的收藏 <span id="favCount">0</span></button><button class="tab" data-tab="data">資料與更新</button></nav>
+
+<section id="search" class="view">
+<div class="panel">
+<h2>官方標牌公告搜尋 <span class="pill" id="resultCount">0 筆公告</span></h2>
+<div class="notice">此頁只呈現公路局官方「未決標標牌公告」。公告號碼／區間不代表目前一般選號可選號碼；實際可選狀態請至監理服務網確認。</div>
+<div class="grid">
+<div class="field"><label>監理單位</label><select id="office"><option value="">全台監理單位</option></select></div>
+<div class="field"><label>號牌類別</label><select id="category"><option value="">全部類別</option></select></div>
+<div class="field"><label>車牌號碼／起迄號</label><input id="plate" placeholder="例如 VVV-1200 或 CES"></div>
+<div class="field"><label>公告狀態</label><select id="period"><option value="">全部公告</option><option value="upcoming">尚未起標</option><option value="active">起標中／尚未決標</option><option value="ended">已過決標時間</option></select></div>
+</div>
+<div class="actions"><button class="primary" id="apply">搜尋公告</button><button id="clear">清除條件</button><button id="refresh">↻ 更新官方資料</button></div>
+<div class="stats"><div class="stat"><strong id="total">0</strong><span>官方公告筆數</span></div><div class="stat"><strong id="filtered">0</strong><span>符合條件</span></div><div class="stat"><strong id="updated">—</strong><span>本機同步時間</span></div></div>
+</div>
+<div class="panel"><h2>公告清單</h2><div id="results" class="empty">尚未取得官方公告資料。請按「更新官方資料」，或到資料與更新頁匯入公路局 CSV。</div></div>
+</section>
+
+<section id="saved" class="view hidden"><div class="panel"><h2>我的收藏</h2><p class="hint">收藏保存在目前裝置的瀏覽器中，不會自動同步到其他裝置。</p><div id="favorites" class="empty">尚未收藏公告。</div></div></section>
+
+<section id="data" class="view hidden"><div class="panel"><h2>官方資料與更新</h2>
+<div class="notice">官方資料目錄標示「標牌公告」每日更新。系統可以每 60 秒檢查官方來源是否有變動，但不會因此把每日更新的資料說成每分鐘更新。</div>
+<p><b>官方資料來源：</b>交通部公路局「標牌公告」CSV</p>
+<p class="source"><a class="btn" href="https://www.thb.gov.tw/News_Content_thbOpenData.aspx?n=13&s=506" target="_blank" rel="noopener">開啟公路局官方資料目錄 ↗</a></p>
+<p><b>官方 CSV：</b></p><p><a href="https://www.thb.gov.tw/Common/ThbOpenDataService.ashx?SN=506&format=1" target="_blank" rel="noopener">下載官方標牌公告 CSV ↗</a></p>
+<p><b>官方選號：</b></p><p><a class="btn primary" href="https://www.mvdis.gov.tw/m3-emv-plate/" target="_blank" rel="noopener">前往監理服務網 ↗</a></p>
+<div class="field" style="margin-top:18px"><label>匯入官方 CSV 檔（若瀏覽器無法直接讀取來源，可在官方目錄下載後匯入）</label><input type="file" id="csvFile" accept=".csv,text/csv"></div>
+<div class="actions"><button id="export">匯出目前公告 CSV</button><button id="resetData">清除本機公告資料</button></div>
+<p class="hint">資料欄位：VehiclesOffice、BidCategory、StartingNumber、EndingNumber、StartDate、EndDate、DeadlineOfTransfer。資料依公路局開放資料頁面所列欄位解析。</p>
+<div id="syncLog" class="hint">尚無同步紀錄。</div>
+</div></section>
+
+<footer class="footer">資料來源：交通部公路局官方開放資料「標牌公告」。本工具非公路局官方網站，亦不代替監理服務網選號作業。公告資料僅供查詢參考，實際號牌選取及競標資格、時間與結果以官方系統為準。</footer>
+</main><div class="toast" id="toast"></div>
+<script>
+const CSV_URL='/api/official-plates';
+const STORAGE='platepro_official_v1',FAV='platepro_official_favs_v1';
+let rows=[],favorites=JSON.parse(localStorage.getItem(FAV)||'[]'),lastSync=null,refreshTimer=null;
+const $=id=>document.getElementById(id);
+function toast(s){$('toast').textContent=s;$('toast').style.display='block';setTimeout(()=>$('toast').style.display='none',2300)}
+function parseCSV(text){let out=[],row=[],v='',q=false;for(let i=0;i<text.length;i++){let c=text[i],n=text[i+1];if(c==='"'&&q&&n==='"'){v+='"';i++}else if(c==='"'){q=!q}else if(c===','&&!q){row.push(v);v=''}else if((c==='\n'||c==='\r')&&!q){if(c==='\r'&&n==='\n')i++;row.push(v);if(row.some(x=>x.trim()))out.push(row);row=[];v=''}else v+=c}row.push(v);if(row.some(x=>x.trim()))out.push(row);return out}
+function norm(s){return String(s||'').replace(/^\uFEFF/,'').trim()}
+function mapCSV(text){let a=parseCSV(text);if(!a.length)return[];let h=a.shift().map(x=>norm(x).toLowerCase());const aliases={office:['vehiclesoffice','監理單位'],category:['bidcategory','號牌類別'],start:['startingnumber','號牌起號'],end:['endingnumber','號牌迄號'],begin:['startdate','起標時間'],finish:['enddate','決標時間'],deadline:['deadlineoftransfer','轉帳截止時間']};let ix={};for(let k in aliases)ix[k]=h.findIndex(x=>aliases[k].includes(x));return a.map(r=>({office:norm(r[ix.office]),category:norm(r[ix.category]),start:norm(r[ix.start]),end:norm(r[ix.end]),begin:norm(r[ix.begin]),finish:norm(r[ix.finish]),deadline:norm(r[ix.deadline])})).filter(x=>x.office&&(x.start||x.end))}
+function save(){localStorage.setItem(STORAGE,JSON.stringify(rows));localStorage.setItem(FAV,JSON.stringify(favorites))}
+function dateTW(s){if(!s)return'—';let n=Number(s);if(Number.isFinite(n)&&n>100000000000){let d=new Date(n);return d.toLocaleString('zh-TW',{hour12:false})}return s}
+function statusOf(r){let now=Date.now(),b=Number(r.begin),e=Number(r.finish);if(Number.isFinite(b)&&b>now)return'尚未起標';if(Number.isFinite(e)&&e<now)return'已過決標時間';return'起標中／尚未決標'}
+function populateFilters(){let offices=[...new Set(rows.map(x=>x.office))].sort(),cats=[...new Set(rows.map(x=>x.category).filter(Boolean))].sort();$('office').innerHTML='<option value="">全台監理單位</option>'+offices.map(x=>`<option>${esc(x)}</option>`).join('');$('category').innerHTML='<option value="">全部類別</option>'+cats.map(x=>`<option>${esc(x)}</option>`).join('')}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function filterRows(){let o=$('office').value,c=$('category').value,p=$('plate').value.trim().toUpperCase(),t=$('period').value;return rows.filter(r=>(!o||r.office===o)&&(!c||r.category===c)&&(!p||[r.start,r.end].join(' ').toUpperCase().includes(p))&&(!t||({upcoming:'尚未起標',active:'起標中／尚未決標',ended:'已過決標時間'}[t]===statusOf(r))))}
+function render(){let list=filterRows();$('total').textContent=rows.length;$('filtered').textContent=list.length;$('resultCount').textContent=list.length+' 筆公告';$('favCount').textContent=favorites.length;if(!list.length){$('results').className='empty';$('results').textContent=rows.length?'沒有符合條件的公告。':'尚無官方公告資料。請按「更新官方資料」，或到資料與更新頁匯入公路局 CSV。';return}
+$('results').className='tablewrap';$('results').innerHTML=`<table><thead><tr><th>監理單位／類別</th><th>號牌區間</th><th>起標時間</th><th>決標時間</th><th>公告狀態</th><th>收藏</th></tr></thead><tbody>${list.map((r)=>{let id=key(r),on=favorites.includes(id);return `<tr><td><b>${esc(r.office)}</b><br><span class="hint">${esc(r.category)}</span></td><td><b>${esc(r.start)}</b>${r.end&&r.end!==r.start?' ～ '+esc(r.end):''}</td><td>${esc(dateTW(r.begin))}</td><td>${esc(dateTW(r.finish))}</td><td><span class="pill">${statusOf(r)}</span></td><td><button class="fav" data-fav="${esc(id)}">${on?'★':'☆'}</button></td></tr>`}).join('')}</tbody></table>`}
+function key(r){return [r.office,r.category,r.start,r.end,r.begin,r.finish].join('|')}
+function renderFav(){let list=rows.filter(r=>favorites.includes(key(r)));$('favorites').className=list.length?'tablewrap':'empty';$('favorites').innerHTML=list.length?`<table><thead><tr><th>監理單位</th><th>號牌區間</th><th>類別</th><th>操作</th></tr></thead><tbody>${list.map(r=>`<tr><td>${esc(r.office)}</td><td>${esc(r.start)}${r.end&&r.end!==r.start?' ～ '+esc(r.end):''}</td><td>${esc(r.category)}</td><td><button class="fav" data-fav="${esc(key(r))}">移除</button></td></tr>`).join('')}</tbody></table>`:'尚未收藏公告。';}
+function updateStatus(){ $('updated').textContent=lastSync?new Date(lastSync).toLocaleTimeString('zh-TW',{hour12:false}):'—';$('statusText').textContent=lastSync?'已載入官方公告資料｜上次檢查 '+new Date(lastSync).toLocaleString('zh-TW',{hour12:false}):'官方資料尚未同步';$('syncLog').textContent=lastSync?'最近一次成功載入：'+new Date(lastSync).toLocaleString('zh-TW',{hour12:false})+'；公告筆數 '+rows.length+'。':'尚無同步紀錄。'}
+async function refresh(){ $('refresh').disabled=true;$('refresh').textContent='更新中…';try{let res=await fetch(CSV_URL,{cache:'no-store'});if(!res.ok)throw new Error('官方來源代理回應 '+res.status);let text=await res.text();let parsed=mapCSV(text);if(!parsed.length)throw new Error('讀取成功但未辨識到公告欄位，請下載官方 CSV 後手動匯入');rows=parsed;lastSync=Date.now();save();populateFilters();render();renderFav();updateStatus();toast('官方公告已更新')}catch(e){toast('自動讀取未成功，請改用官方 CSV 匯入');$('statusText').textContent='官方來源讀取失敗／可手動匯入 CSV';console.warn(e)}finally{$('refresh').disabled=false;$('refresh').textContent='↻ 更新官方資料'}}
+function loadLocal(){try{rows=JSON.parse(localStorage.getItem(STORAGE)||'[]')}catch{rows=[]}if(rows.length){lastSync=Date.now();populateFilters();render();renderFav();updateStatus()}}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.view').forEach(x=>x.classList.toggle('hidden',x.id!==b.dataset.tab));if(b.dataset.tab==='saved')renderFav()});
+$('apply').onclick=render;$('clear').onclick=()=>{$('office').value=$('category').value=$('plate').value=$('period').value='';render()};
+$('refresh').onclick=refresh;$('results').onclick=e=>{let b=e.target.closest('[data-fav]');if(!b)return;let id=b.dataset.fav;favorites=favorites.includes(id)?favorites.filter(x=>x!==id):[...favorites,id];save();render();renderFav()};
+$('favorites').onclick=e=>{let b=e.target.closest('[data-fav]');if(!b)return;favorites=favorites.filter(x=>x!==b.dataset.fav);save();renderFav();render()};
+$('csvFile').onchange=async e=>{let f=e.target.files[0];if(!f)return;let text=await f.text();let parsed=mapCSV(text);if(!parsed.length){toast('CSV 格式不符，請使用公路局原始 CSV');return}rows=parsed;lastSync=Date.now();save();populateFilters();render();renderFav();updateStatus();toast('CSV 匯入完成，共 '+rows.length+' 筆公告')};
+$('export').onclick=()=>{let head=['VehiclesOffice','BidCategory','StartingNumber','EndingNumber','StartDate','EndDate','DeadlineOfTransfer'];let lines=[head.join(','),...rows.map(r=>[r.office,r.category,r.start,r.end,r.begin,r.finish,r.deadline].map(x=>'"'+String(x||'').replace(/"/g,'""')+'"').join(','))];let a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+lines.join('\r\n')],{type:'text/csv;charset=utf-8'}));a.download='車牌快找Pro_官方標牌公告.csv';a.click();URL.revokeObjectURL(a.href)};
+$('resetData').onclick=()=>{if(confirm('確定清除本機公告資料？收藏也會保留。')){rows=[];lastSync=null;save();populateFilters();render();renderFav();updateStatus();toast('本機公告資料已清除')}};
+loadLocal();if(rows.length===0)refresh();refreshTimer=setInterval(refresh,60000);
+</script></body></html>
