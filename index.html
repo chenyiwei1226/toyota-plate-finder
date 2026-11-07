@@ -60,8 +60,103 @@ function parseCSV(text){let out=[],row=[],v='',q=false;for(let i=0;i<text.length
 function norm(s){return String(s||'').replace(/^\uFEFF/,'').trim()}
 function mapCSV(text){let a=parseCSV(text);if(!a.length)return[];let h=a.shift().map(x=>norm(x).toLowerCase());const aliases={office:['vehiclesoffice','監理單位'],category:['bidcategory','號牌類別'],start:['startingnumber','號牌起號'],end:['endingnumber','號牌迄號'],begin:['startdate','起標時間'],finish:['enddate','決標時間'],deadline:['deadlineoftransfer','轉帳截止時間']};let ix={};for(let k in aliases)ix[k]=h.findIndex(x=>aliases[k].includes(x));return a.map(r=>({office:norm(r[ix.office]),category:norm(r[ix.category]),start:norm(r[ix.start]),end:norm(r[ix.end]),begin:norm(r[ix.begin]),finish:norm(r[ix.finish]),deadline:norm(r[ix.deadline])})).filter(x=>x.office&&(x.start||x.end))}
 function save(){localStorage.setItem(STORAGE,JSON.stringify(rows));localStorage.setItem(FAV,JSON.stringify(favorites))}
-function dateTW(s){if(!s)return'—';let n=Number(s);if(Number.isFinite(n)&&n>100000000000){let d=new Date(n);return d.toLocaleString('zh-TW',{hour12:false})}return s}
-function statusOf(r){let now=Date.now(),b=Number(r.begin),e=Number(r.finish);if(Number.isFinite(b)&&b>now)return'尚未起標';if(Number.isFinite(e)&&e<now)return'已過決標時間';return'起標中／尚未決標'}
+
+function parseOfficialDate(value) {
+  const s = String(value ?? '').trim();
+  if (!s) return null;
+
+  const roc = s.match(/^(\d{2,3})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/);
+
+  if (roc) {
+    const year = Number(roc[1]) + 1911;
+    const month = Number(roc[2]);
+    const day = Number(roc[3]);
+    const hour = Number(roc[4]);
+    const minute = Number(roc[5]);
+    const second = Number(roc[6]);
+
+    const d = new Date(year, month - 1, day, hour, minute, second);
+
+    if (
+      d.getFullYear() === year &&
+      d.getMonth() === month - 1 &&
+      d.getDate() === day
+    ) return d;
+
+    return null;
+  }
+
+  const d = new Date(s);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function dateTW(s) {
+  const d = parseOfficialDate(s);
+  return d
+    ? d.toLocaleString('zh-TW', { hour12: false })
+    : (s || '—');
+}
+
+function statusOf(r) {
+  const now = Date.now();
+  const begin = parseOfficialDate(r.begin);
+  const end = parseOfficialDate(r.finish);
+
+  if (!begin || !end) return '日期待確認';
+  if (now < begin.getTime()) return '尚未起標';
+  if (now <= end.getTime()) return '起標中／尚未決標';
+
+  return '已過決標時間';
+}
+
+
+  const s = String(value ?? '').trim();
+  if (!s) return null;
+
+  const roc = s.match(/^(\d{2,3})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/);
+
+  if (roc) {
+    const year = Number(roc[1]) + 1911;
+    const month = Number(roc[2]);
+    const day = Number(roc[3]);
+    const hour = Number(roc[4]);
+    const minute = Number(roc[5]);
+    const second = Number(roc[6]);
+
+    const d = new Date(year, month - 1, day, hour, minute, second);
+
+    if (
+      d.getFullYear() === year &&
+      d.getMonth() === month - 1 &&
+      d.getDate() === day
+    ) return d;
+
+    return null;
+  }
+
+  const d = new Date(s);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function dateTW(s) {
+  const d = parseOfficialDate(s);
+  return d
+    ? d.toLocaleString('zh-TW', { hour12: false })
+    : (s || '—');
+}
+
+function statusOf(r) {
+  const now = Date.now();
+  const begin = parseOfficialDate(r.begin);
+  const end = parseOfficialDate(r.finish);
+
+  if (!begin || !end) return '日期待確認';
+  if (now < begin.getTime()) return '尚未起標';
+  if (now <= end.getTime()) return '起標中／尚未決標';
+
+  return '已過決標時間';
+}
+
 function populateFilters(){let offices=[...new Set(rows.map(x=>x.office))].sort(),cats=[...new Set(rows.map(x=>x.category).filter(Boolean))].sort();$('office').innerHTML='<option value="">全台監理單位</option>'+offices.map(x=>`<option>${esc(x)}</option>`).join('');$('category').innerHTML='<option value="">全部類別</option>'+cats.map(x=>`<option>${esc(x)}</option>`).join('')}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function filterRows(){let o=$('office').value,c=$('category').value,p=$('plate').value.trim().toUpperCase(),t=$('period').value;return rows.filter(r=>(!o||r.office===o)&&(!c||r.category===c)&&(!p||[r.start,r.end].join(' ').toUpperCase().includes(p))&&(!t||({upcoming:'尚未起標',active:'起標中／尚未決標',ended:'已過決標時間'}[t]===statusOf(r))))}
